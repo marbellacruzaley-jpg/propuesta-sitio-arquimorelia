@@ -6,6 +6,9 @@ const { spawnSync } = require('child_process');
 const SRC = process.argv[2];
 const OUT = process.argv[3];
 const HERE = __dirname;
+// hash SHA-256 de "usuario:contraseña" (usuario en minúsculas). Se pasa por variable de entorno; la contraseña nunca se guarda.
+const LOGIN_HASH = process.env.LOGIN_HASH || '';
+if (!/^[0-9a-f]{64}$/.test(LOGIN_HASH)) { console.error('Falta LOGIN_HASH (sha256 hex de "usuario:contraseña")'); process.exit(1); }
 fs.mkdirSync(path.join(OUT, 'assets', 'img'), { recursive: true });
 fs.copyFileSync(path.join(HERE, 'styles.css'), path.join(OUT, 'assets', 'styles.css'));
 fs.copyFileSync(path.join(HERE, 'main.js'), path.join(OUT, 'assets', 'main.js'));
@@ -205,6 +208,8 @@ function layout({ title, desc = '', body, depth = 0, active = '' }) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<script>(function(){var t;try{t=localStorage.getItem('am_auth')||sessionStorage.getItem('am_auth')}catch(e){}if(t!=='${LOGIN_HASH}'){location.replace('${r}index.html?next='+encodeURIComponent(location.pathname.split('/').slice(-${depth + 1}).join('/')+location.search));}})();</script>
 <title>${esc(title)} | Arquidiócesis de Morelia</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="icon" href="${r}${IMGS.logo}">
@@ -220,11 +225,12 @@ function layout({ title, desc = '', body, depth = 0, active = '' }) {
     <a href="${L('agenda')}">Agenda</a>
     <a href="${L('noticias')}">Noticias</a>
     <a class="keep" href="${L('contacto')}">Contacto</a>
+    <a class="keep" href="${r}index.html?logout=1" title="Cerrar sesión">Salir</a>
     <span class="social">${social('facebook')}${social('instagram')}${social('tiktok')}${social('x')}</span>
   </nav>
 </div></div>
 <header class="header"><div class="wrap">
-  <a class="brand" href="${r}index.html"><img src="${r}${IMGS.logo}" alt="Logotipo Arquidiócesis de Morelia"><span class="brand-text"><small>Arquidiócesis de</small><strong>Morelia</strong></span></a>
+  <a class="brand" href="${r}inicio.html"><img src="${r}${IMGS.logo}" alt="Logotipo Arquidiócesis de Morelia"><span class="brand-text"><small>Arquidiócesis de</small><strong>Morelia</strong></span></a>
   <nav class="mainnav" aria-label="Principal">${mega}
       <div class="item${active === 'noticias' ? ' active' : ''}"><a href="${L('noticias')}">Noticias</a></div>
   </nav>
@@ -236,7 +242,7 @@ function layout({ title, desc = '', body, depth = 0, active = '' }) {
 </div></header>
 <div class="mobilenav" aria-label="Menú móvil">
   <div class="top"><strong style="font-family:var(--serif);font-size:1.6rem">Menú</strong><button data-close-menu aria-label="Cerrar">${icon('close')}</button></div>
-  <details open><summary>Inicio<span>+</span></summary><a href="${r}index.html">Portada</a><a href="${L('noticias')}">Noticias</a><a href="${L('contacto')}">Contacto</a></details>
+  <details open><summary>Inicio<span>+</span></summary><a href="${r}inicio.html">Portada</a><a href="${L('noticias')}">Noticias</a><a href="${L('contacto')}">Contacto</a></details>
   ${mobile}
   <a class="btn btn-gold" href="${DONATE}" target="_blank" rel="noopener">Donar</a>
 </div>
@@ -246,7 +252,7 @@ ${body}
 <footer class="footer"><div class="wrap">
   <div class="footer-grid">
     <div>
-      <a class="brand" href="${r}index.html"><img src="${r}${IMGS.logo}" alt=""><span class="brand-text"><small>Arquidiócesis de</small><strong>Morelia</strong></span></a>
+      <a class="brand" href="${r}inicio.html"><img src="${r}${IMGS.logo}" alt=""><span class="brand-text"><small>Arquidiócesis de</small><strong>Morelia</strong></span></a>
       <address>
         <div>${icon('pin')}<span>Costado Pte. de Catedral s/n, Apartado Postal 25<br>58000 Morelia, Michoacán, México</span></div>
         <div>${icon('phone')}<span>(443) 312 2936 · (443) 312 0523</span></div>
@@ -272,7 +278,7 @@ function fix(html, depth) { return depth ? html.replace(/(src|href)="assets\//g,
 function pageHero(title, crumbs, image, depth, extra = '') {
   const r = '../'.repeat(depth);
   return `<section class="page-hero">${image ? `<img src="${r}${image}" alt="">` : ''}<div class="wrap">
-  <div class="crumbs"><a href="${r}index.html">Inicio</a>${crumbs.map(([t, h]) => ` / ${h ? `<a href="${r}${h}">${esc(t)}</a>` : esc(t)}`).join('')}</div>
+  <div class="crumbs"><a href="${r}inicio.html">Inicio</a>${crumbs.map(([t, h]) => ` / ${h ? `<a href="${r}${h}">${esc(t)}</a>` : esc(t)}`).join('')}</div>
   <h1>${esc(title)}</h1>${extra}</div></section>`;
 }
 function sidebar(slug, depth) {
@@ -459,7 +465,108 @@ function postCard(p, depth = 0) {
 
 <section class="newsletter"><div class="wrap"><div><span class="eyebrow">Boletín</span><h2>Recibe noticias y mensajes del Arzobispo</h2></div>
   <form data-proto="news"><input type="email" placeholder="Tu correo electrónico" aria-label="Correo" required><button class="btn btn-wine" type="submit">Suscribirme</button></form></div></section>`;
-  write('index.html', layout({ title: 'Inicio', desc: 'Sitio oficial de la Arquidiócesis de Morelia (propuesta).', body: home }));
+  write('inicio.html', layout({ title: 'Inicio', desc: 'Sitio oficial de la Arquidiócesis de Morelia (propuesta).', body: home }));
+
+  // ===== LOGIN (index.html) =====
+  write('index.html', `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Acceso a la propuesta | Arquidiócesis de Morelia</title>
+<link rel="icon" href="${IMGS.logo}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  body{min-height:100vh;display:grid;grid-template-columns:1.15fr 1fr;background:var(--cream)}
+  .login-art{position:relative;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:48px 56px;background:var(--wine-900)}
+  .login-art .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease}
+  .login-art .slide.on{opacity:1}
+  .login-art .slide img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 9s ease}
+  .login-art .slide.on img{transform:scale(1)}
+  .login-art::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(30,8,14,.55),rgba(30,8,14,.88) 70%)}
+  .login-art>*:not(.slide){position:relative;z-index:2}
+  .login-art .brand strong{color:#fff}.login-art .brand small{color:#e5d3cc}
+  .login-art h1{color:#fff;font-size:clamp(2.4rem,4vw,3.8rem);max-width:560px;margin-bottom:18px}
+  .login-art h1 em{color:var(--gold-300)}
+  .login-art p{color:#f0e3de;max-width:480px;font-size:1.05rem}
+  .login-art .features{display:flex;gap:28px;flex-wrap:wrap;margin-top:28px;font-size:.88rem;color:#ecdcd6}
+  .login-art .features span{display:flex;align-items:center;gap:8px}
+  .login-art .features .icon{color:var(--gold-300);width:18px;height:18px}
+  .login-panel{display:flex;align-items:center;justify-content:center;padding:48px 24px}
+  .login-card{width:100%;max-width:420px}
+  .login-card .seal{width:84px;height:84px;border-radius:50%;box-shadow:var(--shadow);margin-bottom:26px;background:#fff}
+  .login-card h2{font-size:2.5rem;margin-bottom:6px}
+  .login-card>p{color:var(--muted);margin-bottom:30px}
+  .fld{display:block;margin-bottom:18px}
+  .fld span{display:block;font-size:.82rem;font-weight:600;color:var(--ink-2);margin-bottom:8px}
+  .fld .box{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;background:#fff;transition:.2s}
+  .fld .box:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(195,154,62,.15)}
+  .fld .box .icon{color:var(--muted);width:20px;flex-shrink:0}
+  .fld input{border:0;outline:none;font:inherit;padding:14px 0;width:100%;background:transparent;color:var(--ink)}
+  .fld button{background:none;border:0;cursor:pointer;color:var(--muted);font:600 .8rem var(--sans);padding:6px}
+  .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 26px;font-size:.88rem;color:var(--ink-2)}
+  .row label{display:flex;gap:8px;align-items:center;cursor:pointer}
+  .row input{accent-color:var(--wine);width:16px;height:16px}
+  .login-card .btn{width:100%;justify-content:center;padding:16px;font-size:1rem}
+  .err{display:none;background:#fdecee;color:#8a1c2c;border:1px solid #f3c4cb;border-radius:10px;padding:12px 14px;font-size:.88rem;margin-bottom:18px}
+  .err.show{display:block;animation:shake .35s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .login-foot{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
+  .login-foot .icon{width:18px;height:18px;color:var(--gold);flex-shrink:0}
+  @media (max-width:900px){body{grid-template-columns:1fr}.login-art{min-height:300px;padding:28px 22px}.login-art h1{font-size:2.2rem}.login-art .features{display:none}.login-panel{padding:36px 16px 48px}}
+</style>
+</head>
+<body>
+<section class="login-art">
+  <div class="slide on"><img src="${IMGS.heroCross}" alt=""></div>
+  <div class="slide"><img src="${IMGS.heroStreet}" alt=""></div>
+  <div class="slide"><img src="${IMGS.virgen}" alt=""></div>
+  <a class="brand" href="#"><img src="${IMGS.logo}" alt=""><span class="brand-text"><small>Arquidiócesis de</small><strong>Morelia</strong></span></a>
+  <div>
+    <span class="eyebrow" style="color:var(--gold-300)">Propuesta de rediseño 2026</span>
+    <h1>Un nuevo sitio para <em>caminar juntos</em></h1>
+    <p>Presentación privada del nuevo sitio web de la Arquidiócesis de Morelia: diseño moderno, información organizada y servicios al alcance de los fieles.</p>
+    <div class="features"><span>${icon('church')}Directorio de parroquias</span><span>${icon('doc')}Trámites y requisitos</span><span>${icon('book')}116 noticias</span></div>
+  </div>
+  <small style="color:rgba(255,255,255,.6)">Borrador para revisión · No es el sitio oficial</small>
+</section>
+<main class="login-panel">
+  <form class="login-card" id="login" autocomplete="on" novalidate>
+    <img class="seal" src="${IMGS.logo}" alt="">
+    <h2>Bienvenido</h2>
+    <p>Inicia sesión para ver la propuesta.</p>
+    <div class="err" id="err" role="alert">Usuario o contraseña incorrectos. Inténtalo de nuevo.</div>
+    <label class="fld"><span>Usuario</span><div class="box">${icon('users')}<input id="user" name="username" autocomplete="username" required autofocus></div></label>
+    <label class="fld"><span>Contraseña</span><div class="box"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><input id="pass" type="password" name="password" autocomplete="current-password" required><button type="button" id="toggle" aria-label="Mostrar contraseña">Ver</button></div></label>
+    <div class="row"><label><input type="checkbox" id="remember"> Recordarme en este equipo</label></div>
+    <button class="btn btn-wine" type="submit">Entrar ${icon('arrow')}</button>
+    <div class="login-foot">${icon('pin')}<span>Acceso restringido a personas autorizadas. ¿No tienes acceso? Solicítalo a quien te compartió esta propuesta.</span></div>
+  </form>
+</main>
+<script>
+(function(){
+  var H='${LOGIN_HASH}', q=new URLSearchParams(location.search);
+  function store(){try{return localStorage.getItem('am_auth')||sessionStorage.getItem('am_auth')}catch(e){return null}}
+  function next(){var n=q.get('next')||'';return /^[\\w\\-\\/\\.%?=&]+\\.html([?].*)?$/.test(n)&&n.indexOf('//')<0&&n.indexOf('index.html')<0?n:'inicio.html'}
+  if(q.get('logout')){try{localStorage.removeItem('am_auth');sessionStorage.removeItem('am_auth')}catch(e){}history.replaceState(null,'',location.pathname)}
+  else if(store()===H){location.replace(next());return}
+  var s=document.querySelectorAll('.login-art .slide'),i=0;setInterval(function(){s[i].classList.remove('on');i=(i+1)%s.length;s[i].classList.add('on')},6000);
+  var p=document.getElementById('pass');
+  document.getElementById('toggle').onclick=function(){var v=p.type==='password';p.type=v?'text':'password';this.textContent=v?'Ocultar':'Ver'};
+  async function sha(t){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
+  document.getElementById('login').addEventListener('submit',async function(e){
+    e.preventDefault();var err=document.getElementById('err');err.classList.remove('show');
+    var h=await sha(document.getElementById('user').value.trim().toLowerCase()+':'+p.value);
+    if(h===H){try{(document.getElementById('remember').checked?localStorage:sessionStorage).setItem('am_auth',h)}catch(e){}location.replace(next())}
+    else{void err.offsetWidth;err.classList.add('show');p.value='';p.focus()}
+  });
+})();
+</script>
+</body>
+</html>`);
 
   // ===== páginas internas genéricas =====
   const HERO_FALLBACK = { arzobispado: IMGS.arzMass, directorio: IMGS.catDay, pastoral: IMGS.group, documentos: IMGS.darkCat, historia: IMGS.heroStreet };

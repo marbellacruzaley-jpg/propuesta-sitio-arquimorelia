@@ -6,6 +6,9 @@ Prototipo estático (HTML/CSS/JS) de un nuevo sitio web para la Arquidiócesis d
 - **Estructura:** basada en el mapa del sitio de la Arquidiócesis de Guadalajara (Arzobispado, Directorio, Trámites, Pastoral, Documentos, Historia y Fe, Noticias).
 - **Estado:** borrador. Los formularios son demostrativos; el directorio de parroquias, horarios de misa y zonas pastorales están pendientes de datos.
 
+## Acceso
+La página principal (`index.html`) es una pantalla de inicio de sesión; tras entrar se muestra la propuesta (`inicio.html`). Es un control de acceso del lado del navegador (sitio estático): la contraseña no está en el repositorio, solo su hash SHA-256. Las credenciales se comparten por separado.
+
 ## Ver la propuesta
 Abre `index.html` en el navegador (no requiere servidor).
 
@@ -13,6 +16,6 @@ Abre `index.html` en el navegador (no requiere servidor).
 `_herramientas/scrape.js` descarga el contenido del sitio actual y `_herramientas/build.js` genera este sitio:
 
 ```
-node _herramientas/build.js <carpeta-descarga> <carpeta-salida>
+LOGIN_HASH=<sha256 de "usuario:contraseña"> node _herramientas/build.js <carpeta-descarga> <carpeta-salida>
 ```
 Requiere Node.js, ffmpeg y los paquetes `cheerio` y `docx` (solo para el scraper).
