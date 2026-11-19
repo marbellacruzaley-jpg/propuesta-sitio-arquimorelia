@@ -393,13 +393,15 @@ function postCard(p, depth = 0) {
   </div>
 </div></div></section>
 
-<section class="quicklinks"><div class="wrap"><div class="ql-grid">
-  <a class="ql" href="https://www.vaticannews.va/es/evangelio-de-hoy.html" target="_blank" rel="noopener">${icon('sun')}<strong>Evangelio del día</strong><small>Lecturas de hoy</small></a>
-  <a class="ql" href="https://www.vatican.va/archive/ESL0506/_INDEX.HTM" target="_blank" rel="noopener">${icon('book')}<strong>Biblia</strong><small>Sagrada Escritura</small></a>
-  <a class="ql" href="https://www.vatican.va/archive/catechism_sp/index_sp.html" target="_blank" rel="noopener">${icon('cross')}<strong>Catecismo</strong><small>De la Iglesia Católica</small></a>
-  <a class="ql" href="https://www.vaticannews.va/es/santos.html" target="_blank" rel="noopener">${icon('users')}<strong>Santoral</strong><small>Santo del día</small></a>
-  <a class="ql" href="https://www.vaticannews.va/es.html" target="_blank" rel="noopener">${icon('globe')}<strong>Vatican News</strong><small>Noticias del Papa</small></a>
-  <a class="ql" href="https://cem.org.mx/" target="_blank" rel="noopener">${icon('church')}<strong>CEM</strong><small>Episcopado Mexicano</small></a>
+<section class="quicklinks"><div class="wrap">
+  <div class="ql-head"><span class="eyebrow">Para tu vida de fe</span><h2>Alimenta tu fe cada día</h2></div>
+<div class="ql-grid">
+  <a class="ql" style="--i:0" href="https://www.vaticannews.va/es/evangelio-de-hoy.html" target="_blank" rel="noopener"><span class="ql-ico">${icon('sun')}</span><strong>Evangelio del día</strong><small data-ql-today>Lecturas de hoy</small><span class="ql-go" aria-hidden="true">Abrir<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr-only"> (se abre en otra pestaña)</span></a>
+  <a class="ql" style="--i:1" href="https://www.vatican.va/archive/ESL0506/_INDEX.HTM" target="_blank" rel="noopener"><span class="ql-ico">${icon('book')}</span><strong>Biblia</strong><small>Sagrada Escritura</small><span class="ql-go" aria-hidden="true">Abrir<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr-only"> (se abre en otra pestaña)</span></a>
+  <a class="ql" style="--i:2" href="https://www.vatican.va/archive/catechism_sp/index_sp.html" target="_blank" rel="noopener"><span class="ql-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0A2 2 0 0 0 6 22h13"/><path d="M12 6.5v8M9.5 9h5"/></svg></span><strong>Catecismo</strong><small>De la Iglesia Católica</small><span class="ql-go" aria-hidden="true">Abrir<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr-only"> (se abre en otra pestaña)</span></a>
+  <a class="ql" style="--i:3" href="https://www.vaticannews.va/es/santos.html" target="_blank" rel="noopener"><span class="ql-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="3.5" rx="4" ry="1.5"/><circle cx="12" cy="9" r="3.2"/><path d="M5 21v-1.5A5.5 5.5 0 0 1 10.5 14h3a5.5 5.5 0 0 1 5.5 5.5V21"/></svg></span><strong>Santoral</strong><small data-ql-today>Santo del día</small><span class="ql-go" aria-hidden="true">Abrir<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr-only"> (se abre en otra pestaña)</span></a>
+  <a class="ql" style="--i:4" href="https://www.vaticannews.va/es.html" target="_blank" rel="noopener"><span class="ql-ico">${icon('globe')}</span><strong>Vatican News</strong><small>Noticias del Papa</small><span class="ql-go" aria-hidden="true">Abrir<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr-only"> (se abre en otra pestaña)</span></a>
+  <a class="ql" style="--i:5" href="https://cem.org.mx/" target="_blank" rel="noopener"><span class="ql-ico">${icon('church')}</span><strong>CEM</strong><small>Episcopado Mexicano</small><span class="ql-go" aria-hidden="true">Abrir<svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="sr-only"> (se abre en otra pestaña)</span></a>
 </div></div></section>
 
 <section class="section"><div class="wrap">
