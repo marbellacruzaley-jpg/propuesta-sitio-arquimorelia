@@ -186,7 +186,9 @@
       '<svg viewBox="0 0 24 24" class="icon"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/><path d="M12 8v6M9 11h6"/></svg><span>¿Te ayudamos?</span></button>' +
     '<section class="cb-panel" id="cb-panel" role="dialog" aria-label="Asistente diocesano" hidden>' +
       '<header><div><strong>Asistente diocesano</strong><small>Trámites, horarios y contacto</small></div>' +
-      '<button type="button" class="cb-close" aria-label="Cerrar">×</button></header>' +
+      '<div class="cb-actions"><button type="button" class="cb-clear" aria-label="Limpiar conversación" title="Limpiar conversación">' +
+        '<svg viewBox="0 0 24 24" class="icon"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg><span>Limpiar</span></button>' +
+      '<button type="button" class="cb-close" aria-label="Cerrar">×</button></div></header>' +
       '<div class="cb-log" aria-live="polite"></div>' +
       '<form class="cb-form"><input type="text" placeholder="Escribe tu pregunta…" aria-label="Tu pregunta" autocomplete="off" maxlength="300">' +
       '<button type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24" class="icon"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>' +
@@ -217,24 +219,37 @@
     var typing = document.createElement('div');
     typing.className = 'cb-msg cb-bot cb-typing'; typing.innerHTML = '<i></i><i></i><i></i>';
     log.appendChild(typing); log.scrollTop = log.scrollHeight;
+    var g = gen;
     setTimeout(function () {
       typing.remove();
+      if (g !== gen) return;
       var r = answer(text);
       if (r) { if (r.id) last = r; add('bot', r.a, r.chips); }
       else add('bot', 'Perdón, no encontré una respuesta para eso. Puedes llamar al Arzobispado al ' + TEL + ' (lunes a viernes, 9:30–13:30 h) o ' + link('contacto.html', 'escribirnos') + '.', ['Bautismo', 'Matrimonio', 'Encontrar parroquia', 'Donar']);
     }, 450);
+  }
+  function welcome() {
+    add('bot', '¡Hola! Soy el asistente de la Arquidiócesis de Morelia. Pregúntame por requisitos de sacramentos, horarios de oficina, contacto o cómo donar.', ['Bautismo', 'Primera Comunión', 'Confirmación', 'Matrimonio', 'Horarios de oficina', 'Donar']);
+  }
+  var gen = 0; // invalida respuestas pendientes al limpiar
+  function clearChat() {
+    gen++; last = null;
+    log.innerHTML = '';
+    welcome();
+    input.value = ''; input.focus();
   }
   function toggle(open) {
     panel.hidden = !open;
     fab.setAttribute('aria-expanded', String(open));
     box.classList.toggle('open', open);
     if (open) {
-      if (!log.children.length) add('bot', '¡Hola! Soy el asistente de la Arquidiócesis de Morelia. Pregúntame por requisitos de sacramentos, horarios de oficina, contacto o cómo donar.', ['Bautismo', 'Primera Comunión', 'Confirmación', 'Matrimonio', 'Horarios de oficina', 'Donar']);
+      if (!log.children.length) welcome();
       setTimeout(function () { input.focus(); }, 50);
     } else fab.focus();
   }
   fab.addEventListener('click', function () { toggle(panel.hidden); });
   box.querySelector('.cb-close').addEventListener('click', function () { toggle(false); });
+  box.querySelector('.cb-clear').addEventListener('click', clearChat);
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); input.value = ''; });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) toggle(false); });
 })();

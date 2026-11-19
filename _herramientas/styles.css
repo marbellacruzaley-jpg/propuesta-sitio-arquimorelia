@@ -390,6 +390,10 @@ blockquote.quote{font-family:var(--serif);font-size:clamp(1.4rem,2.3vw,1.9rem);l
 .cb-panel header small{color:#e9d9d2;font-size:.78rem}
 .cb-close{background:none;border:0;color:#fff;font-size:1.8rem;line-height:1;cursor:pointer;padding:0 4px;opacity:.8}
 .cb-close:hover{opacity:1}
+.cb-actions{display:flex;align-items:center;gap:6px}
+.cb-clear{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:5px 10px;font:inherit;font-size:.76rem;cursor:pointer;opacity:.85;transition:opacity .15s,background .15s}
+.cb-clear:hover,.cb-clear:focus-visible{opacity:1;background:rgba(255,255,255,.12)}
+.cb-clear .icon{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cb-log{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:10px;background:var(--cream)}
 .cb-msg{max-width:88%;padding:11px 14px;border-radius:14px;font-size:.9rem;line-height:1.5;overflow-wrap:anywhere}
 .cb-msg p{margin:.5em 0 0}
